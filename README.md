@@ -24,9 +24,9 @@ Compile LinzerSchnitteMidi as follows:
 gcc LinzerSchnitteMidibeta0.5.c -o LinzerSchnitteMidi -lm -lasound
 ```
 
-## Run LinzerSchnitteMidi
+## Run LinzerSchnitteMidi on raspPi
 
- * ``` $ LinzerSchnitteMidi  ```
+ * ``` $ ./LinzerSchnitteMidi  LinzerSchnitteMIDI <hw:0,0,1> 0.001 0.001 1 0 ```
 
 
 
