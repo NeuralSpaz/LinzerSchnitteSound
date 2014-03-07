@@ -31,7 +31,7 @@ make
 
 ## Run LinzerSchnitteMidi on raspPi
 
- * ``` $ ./LinzerSchnitteMidi  LinzerSchnitteMIDI <hw:0,0,1> 0.001 0.001 1 0 ```
+ * ``` $ ./LinzerSchnitteMidi <hw:0,0,1> 0.001 0.001 1 0 ```
 
 
 
