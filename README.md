@@ -23,6 +23,11 @@ Compile LinzerSchnitteMidi as follows:
 ```bash
 gcc LinzerSchnitteMidibeta0.5.c -o LinzerSchnitteMidi -lm -lasound
 ```
+or
+```bash
+make
+```
+
 
 ## Run LinzerSchnitteMidi on raspPi
 
