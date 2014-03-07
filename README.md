@@ -26,7 +26,7 @@ gcc LinzerSchnitteMidibeta0.5.c -o LinzerSchnitteMidi -lm -lasound
 
 ## Run LinzerSchnitteMidi on raspPi
 
- * ``` $ ./LinzerSchnitteMidi  LinzerSchnitteMIDI <hw:0,0,1> 0.001 0.001 1 o ```
+ * ``` $ ./LinzerSchnitteMidi  LinzerSchnitteMIDI <hw:0,0,1> 0.001 0.001 1 0 ```
 
 
 
