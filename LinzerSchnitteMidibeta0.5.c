@@ -27,6 +27,8 @@
 #define POLY 10
 #define GAIN 1000.0
 #define BUFSIZE 1024
+#define FREQ_START 300
+#define FREQ_CHANNEL_WIDTH 100
 
 snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
@@ -110,7 +112,7 @@ int midi_callback() {
                 for (l1 = 0; l1 < POLY; l1++) {
                     if (!note_active[l1]) {
                         note[l1] = ev->data.note.note;
-			printf("Note ON  %d FREQ %d\n", note[l1] ,(note[l1])*100+300);
+			printf("Note ON  %d FREQ %d\n", note[l1] ,(note[l1])*FREQ_CHANNEL_WIDTH+FREQ_START);
                         velocity[l1] = ev->data.note.velocity / 127.0;
                         env_time[l1] = 0;
                         gate[l1] = 1;
@@ -142,7 +144,7 @@ int playback_callback (snd_pcm_sframes_t nframes) {
     memset(buf, 0, nframes * 4);
     for (l2 = 0; l2 < POLY; l2++) {
         if (note_active[l2]) {
-            freq_note = (note[l2]*100)+300;
+            freq_note = (note[l2]*FREQ_CHANNEL_WIDTH)+FREQ_START;
 /*debug	    printf(" Note Frequency %6.2f \n", freq_note); */
 
 /* make faster by precompute delta phase*/
