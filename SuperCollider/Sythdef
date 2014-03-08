@@ -1,0 +1,40 @@
+﻿\\ The Synth
+(
+SynthDef(\sine, { |out, freq = 440, amp = 0.1, gate = 1, attack = 0.01, decay = 0.1, curve = -4| 
+var env = EnvGen.kr(Env.asr(attack, amp, decay, curve), gate, doneAction: 2);
+Out.ar(out, 
+(FSinOsc.ar(freq) * env).dup( 2) // play out of 2 chans
+);
+}).add;
+);
+
+var notes, on, off;
+// one note for each MIDI note
+notes = Array.newClear(128);  
+
+on = Routine({
+var event, newNode;
+loop {
+// get note on	
+event = MIDIIn.waitNoteOn;	
+// play the note use midinote#*100 +300
+newNode = Synth(\sine, [\freq, event.b * 100 + 300,\amp, event.c / 127]);
+// Post tone playing
+[event.status, event.b, event.b * 100 + 300, event.c].postln;  
+// save it
+notes.put(event.b, newNode);	
+}
+}).play;
+
+
+off = Routine({
+var event;
+loop {
+// get note off	
+event = MIDIIn.waitNoteOff;
+// look up the note and turn it off with gate
+notes[event.b].set(\gate, 0);
+// Post tone off	
+[event.status, event.b, event.b * 100 + 300, event.c].postln;
+}
+}).play;
