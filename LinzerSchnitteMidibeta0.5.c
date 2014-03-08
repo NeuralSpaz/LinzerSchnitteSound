@@ -142,7 +142,7 @@ int playback_callback (snd_pcm_sframes_t nframes) {
     memset(buf, 0, nframes * 4);
     for (l2 = 0; l2 < POLY; l2++) {
         if (note_active[l2]) {
-            freq_note = (note[l2]*100)+400;
+            freq_note = (note[l2]*100)+300;
 /*debug	    printf(" Note Frequency %6.2f \n", freq_note); */
 
 /* make faster by precompute delta phase*/
