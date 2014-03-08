@@ -28,7 +28,7 @@
 #define GAIN 1000.0
 #define BUFSIZE 1024
 #define FREQ_START 300
-#define FREQ_CHANNEL_WIDTH 25
+#define FREQ_CHANNEL_WIDTH 100
 
 snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
