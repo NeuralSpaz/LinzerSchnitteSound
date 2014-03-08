@@ -1,4 +1,4 @@
-![text](https://github.com/NeuralSpaz/LinzerSchnitteSound/blob/master/linzerschnitte_logo.png "logo") 
+![text](blob/master/linzerschnitte_logo.png "logo") 
 # LinzerSchnitteMidi
 
 LinzerSchnitteMidi generate pure tones using a MIDI interface for controlling LinzerSchnitte Receivers
