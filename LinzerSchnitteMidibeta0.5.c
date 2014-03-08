@@ -25,8 +25,8 @@
 #include <math.h>
 
 #define POLY 10
-#define GAIN 500.0
-#define BUFSIZE 512
+#define GAIN 1000.0
+#define BUFSIZE 1024
 
 snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
