@@ -110,7 +110,7 @@ int midi_callback() {
                 for (l1 = 0; l1 < POLY; l1++) {
                     if (!note_active[l1]) {
                         note[l1] = ev->data.note.note;
-			printf("Note ON  %d FREQ %d\n", note[l1] ,(note[l1])*100+400);
+			printf("Note ON  %d FREQ %d\n", note[l1] ,(note[l1])*100+300);
                         velocity[l1] = ev->data.note.velocity / 127.0;
                         env_time[l1] = 0;
                         gate[l1] = 1;
