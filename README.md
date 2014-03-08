@@ -44,7 +44,13 @@ to run a test use the provided test.midi
 
  * ``` $ aplaymidi --port LinzerSchnitteMIDI test.midi ```
 
+You may have to adjust your alsa setting. 
 
+On RaspberryPi using the 3.5mm jack produces a pop between notes,
+to fix update firmware to current version. If you are using Raspian
+you can do this by running 
+
+* ``` $ sudo rpi-update ```
 
 
 
