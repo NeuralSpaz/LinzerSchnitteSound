@@ -36,7 +36,7 @@ short *buf;
 double phi[POLY], velocity[POLY], attack, decay, sustain, release, env_time[POLY], env_level[POLY];
 int note[POLY], gate[POLY], note_active[POLY];
 int rate = 48000;
-int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth;
+/*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
 
 /* TODO Make sample rate, buffer, gain and polyphony set from CL interface*/
 
@@ -184,11 +184,12 @@ int main (int argc, char *argv[]) {
     decay = atof(argv[3]);
     sustain = atof(argv[4]);
     release = atof(argv[5]);
-    polyphony = atoi(argv[6]);
+/*    polyphony = atoi(argv[6]);
     buffersize = atoi(argv[7]);
     outputvolume = atoi(argv[8]);
     firstnotefreq = atoi(argv[9]);
     freqchannelwidth = atoi(argv[10]);
+*/
     buf = (short *) malloc (2 * sizeof (short) * BUFSIZE);
     playback_handle = open_pcm(argv[1]);
     seq_handle = open_seq();
