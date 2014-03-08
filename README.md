@@ -1,4 +1,3 @@
-
 # LinzerSchnitteMidi
 
 LinzerSchnitteMidi generate pure tones using a MIDI interface for controlling LinzerSchnitte Receivers
@@ -6,8 +5,6 @@ LinzerSchnitteMidi generate pure tones using a MIDI interface for controlling Li
 For more information on the LinzerSchnitte Project:
 
 [Please see the LinzerSchnitte Receiver Repo] (https://github.com/RayGardiner/LinzerSchnitte-)
-
-[Please see the LinzerSchnitte site] (http://www.aec.at/LinzerSchnitte)
 
 [Please see the LinzerSchnitte Wiki] (http://www.aec.at/linzerschnitte/wiki/index.php/Main_Page)
 
