@@ -97,7 +97,7 @@ double envelope(int *note_active, int gate, double *env_level, double t, double 
         return(*env_level * (1.0 - t / release));
     }
 }
-
+/* TODO: ADD MIDI PANIC/ALL NOTES OFF */
 int midi_callback() {
 
     snd_seq_event_t *ev;
