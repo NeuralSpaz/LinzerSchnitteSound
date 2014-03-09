@@ -15,7 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
     Based on miniFMsynth by Matthias Nagorni. 	
-
+    
+    Complie with
+	gcc -lm -lasound -lcurses -o LinzerSchnitteMidi0.7 LinzerSchnitteMidibeta0.7.c 
 */
 
 
@@ -26,15 +28,12 @@
 #include <curses.h>
 #include <unistd.h>
 
-#define FREQ_START 300
-#define FREQ_CHANNEL_WIDTH 25
-
 snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
 short *buf;
 double phi[512], velocity[512], midichannel[512], attack, decay, sustain, release, env_time[512], env_level[512];
 int note[512], gate[512], note_active[512];
-int rate, poly, gain, buffer_size;
+int rate, poly, gain, buffer_size, freq_start, freq_channel_width;
 
 
 /*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
@@ -121,7 +120,7 @@ int midi_callback() {
 			printw("CH %2.0f ", midichannel[l1]+1);
 			printw("Note %3d ON ", note[l1]);
 			printw("Velocity %3.0f ", velocity[l1]*127);
-			printw("Frequency %3.1f Hz \n", ((note[l1]*FREQ_CHANNEL_WIDTH)+((128*FREQ_CHANNEL_WIDTH*midichannel[l1])+FREQ_START)) );
+			printw("Frequency %3.1f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
 			refresh();
 			attroff(COLOR_PAIR(1));
                         env_time[l1] = 0;
@@ -140,7 +139,7 @@ int midi_callback() {
 			printw("CH %2.0f ", midichannel[l1]+1);
 			printw("Note %3d OFF", note[l1]);
 			printw("Velocity %3.0f ", velocity[l1]*127);
-			printw("Frequency %3.1f Hz\n", ((note[l1]*FREQ_CHANNEL_WIDTH)+((128*FREQ_CHANNEL_WIDTH*midichannel[l1])+FREQ_START)) );			
+			printw("Frequency %3.1f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
 			refresh();
                         env_time[l1] = 0;
                         gate[l1] = 0;
@@ -161,7 +160,7 @@ int playback_callback (snd_pcm_sframes_t nframes) {
     memset(buf, 0, nframes * 4);
     for (l2 = 0; l2 < poly; l2++) {
         if (note_active[l2]) {
-            freq_note = (note[l2]*FREQ_CHANNEL_WIDTH)+((128*FREQ_CHANNEL_WIDTH*midichannel[l2])+FREQ_START);
+            freq_note = (note[l2]*freq_channel_width)+((128*freq_channel_width*midichannel[l2])+freq_start);
             dphi = (M_PI * freq_note * 2) / (rate);
 	    for (l1 = 0; l1 < nframes; l1++) {
                 phi[l2] += dphi;
@@ -219,15 +218,17 @@ int main (int argc, char *argv[]) {
     init_pair(1, COLOR_RED, COLOR_BLACK); /* end the curses setup */
 
 /* Set default */    
-    hwdevice = "hw:0,0,1"; //case D
-    attack = 0.001;        //case a
-    decay = 0.001;         //case d
-    sustain = 1;           //case s
-    release = 0.001;       //case o
-    poly = 3;              //case p
-    rate = 44100;          //case r
-    gain = 1000;	   //case g
-    buffer_size = 1024;	   //case b
+    hwdevice = "hw:0,0,1";    //case D
+    attack = 0.001;           //case a
+    decay = 0.001;            //case d
+    sustain = 1;              //case s
+    release = 0.001;          //case o
+    poly = 3;                 //case p
+    rate = 44100;             //case r
+    gain = 1000;	      //case g
+    buffer_size = 1024;	      //case b
+    freq_start = 300;         //case t
+    freq_channel_width = 100; //case w
 	
 while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 	switch (c)
@@ -277,9 +278,11 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 		break;
 	case 't':
 		tvalue = optarg;
+		freq_start = atoi(tvalue);
 		break;
 	case 'w':
 		wvalue = optarg;
+		freq_channel_width = atoi(wvalue);
 		break;
 	case '?':
 		if (optopt == 'c')
@@ -304,6 +307,8 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
     printw("Using Release of   = %3.3f seconds\n", release);
     printw("Using polyphony of = %5d tones\n", poly);
     printw("Using gain of      = %5d \n", gain);
+    printw("Using base freq of = %5d Hz\n", freq_start);
+    printw("Using freq step of = %5d Hz\n", freq_channel_width);
     refresh();
 
 
