@@ -17,7 +17,7 @@
     Based on miniFMsynth by Matthias Nagorni. 	
     
     Complie with
-	gcc -lm -lasound -lcurses -o LinzerSchnitteMidi0.7 LinzerSchnitteMidibeta0.7.c 
+	$ gcc -lm -lasound -lcurses -o LinzerSchnitteMidi0.7 LinzerSchnitteMidibeta0.7.c 
 */
 
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <alsa/asoundlib.h>
 #include <math.h>
-#include <curses.h>
+#include <ncurses.h>
 #include <unistd.h>
 
 snd_seq_t *seq_handle;
@@ -33,26 +33,27 @@ snd_pcm_t *playback_handle;
 short *buf;
 double phi[512], velocity[512], midichannel[512], attack, decay, sustain, release, env_time[512], env_level[512];
 int note[512], gate[512], note_active[512];
-int rate, poly, gain, buffer_size, freq_start, freq_channel_width;
+int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
+WINDOW *my_win, *my_other_win;
 
-
-/*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
-
-/* TODO Make sample rate, buffer, gain and polyphony set from CL interface*/
 
 snd_seq_t *open_seq() {
 
     snd_seq_t *seq_handle;
 
     if (snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0) < 0) {
-        fprintf(stderr, "Error opening ALSA sequencer.\n");
+	attron(COLOR_PAIR(1));
+        printw("\n Error opening ALSA sequencer.\n");
+        attroff(COLOR_PAIR(1));
         exit(1);
     }
-    snd_seq_set_client_name(seq_handle, "LinzerSchnitteMIDI");
-    if (snd_seq_create_simple_port(seq_handle, "LinzerSchnitteMIDI",
+    snd_seq_set_client_name(seq_handle, "LSMin");
+    if (snd_seq_create_simple_port(seq_handle, "LSMin",
         SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
         SND_SEQ_PORT_TYPE_APPLICATION) < 0) {
-        fprintf(stderr, "Error creating sequencer port.\n");
+	attron(COLOR_PAIR(1));
+        printw("\n Error creating sequencer port.\n");
+	attroff(COLOR_PAIR(1));
         exit(1);
     }
     return(seq_handle);
@@ -65,7 +66,9 @@ snd_pcm_t *open_pcm(char *pcm_name) {
     snd_pcm_sw_params_t *sw_params;
 
     if (snd_pcm_open (&playback_handle, pcm_name, SND_PCM_STREAM_PLAYBACK, 0) < 0) {
-        fprintf (stderr, "cannot open audio device %s\n", pcm_name);
+	attron(COLOR_PAIR(1));
+	printw("\n Error: cannot open audio device %s\n\n", pcm_name);
+        attroff(COLOR_PAIR(1));
         exit (1);
     }
     snd_pcm_hw_params_alloca(&hw_params);
@@ -116,13 +119,14 @@ int midi_callback() {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
 			velocity[l1] = velocity[l1] / 127;
-			attron(COLOR_PAIR(1));			
-			printw("CH %2.0f ", midichannel[l1]+1);
-			printw("Note %3d ON ", note[l1]);
-			printw("Velocity %3.0f ", velocity[l1]*127);
-			printw("Frequency %3.1f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+			wattrset(my_win, COLOR_PAIR(3));			
+			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
+			wprintw(my_win,"Note %3d ON  ", note[l1]);
+			wprintw(my_win,"Velocity  %3.0f ", velocity[l1]*127);
+			wprintw(my_win,"Frequency %3.1f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
 			refresh();
-			attroff(COLOR_PAIR(1));
+			wrefresh(my_win);
+//			attroff(COLOR_PAIR(1));
                         env_time[l1] = 0;
                         gate[l1] = 1;
                         note_active[l1] = 1;
@@ -136,11 +140,13 @@ int midi_callback() {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
 			velocity[l1] = velocity[l1] / 127;			
-			printw("CH %2.0f ", midichannel[l1]+1);
-			printw("Note %3d OFF", note[l1]);
-			printw("Velocity %3.0f ", velocity[l1]*127);
-			printw("Frequency %3.1f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
+			wattrset(my_win, COLOR_PAIR(1));			
+			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
+			wprintw(my_win,"Note %3d OFF ", note[l1]);
+			wprintw(my_win,"Velocity  %3.0f ", velocity[l1]*127);
+			wprintw(my_win,"Frequency %3.1f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
 			refresh();
+			wrefresh(my_win);
                         env_time[l1] = 0;
                         gate[l1] = 0;
                     }
@@ -177,9 +183,23 @@ int playback_callback (snd_pcm_sframes_t nframes) {
     return snd_pcm_writei (playback_handle, buf, nframes);
 }
 
-void do_endwin(void) {endwin();}
+void do_endwin(void) 
+{
+    printw("Press any key to end the program...");
+    refresh();
+    getch();
+    endwin();
+}
 
 int main (int argc, char *argv[]) {
+
+
+//    int startx, starty, width, height;
+//    starty = 1;	/* Calculating for a center placement */
+//    startx = 1;	/* of the window		*/
+
+//    height = 20;
+//    width = 20;
 
     int nfds, seq_nfds, l1;
     int key;
@@ -206,16 +226,6 @@ int main (int argc, char *argv[]) {
     opterr = 0;
 
     struct pollfd *pfds;
-
-    initscr();				  /* start the curses setup */
-    atexit(do_endwin);
-    keypad(stdscr, TRUE);
-    noecho();
-    scrollok(stdscr, TRUE);
-    printw("Welcome to LinzerSchnitte\n");
-    refresh();
-    start_color();	
-    init_pair(1, COLOR_RED, COLOR_BLACK); /* end the curses setup */
 
 /* Set default */    
     hwdevice = "hw:0,0,1";    //case D
@@ -245,8 +255,19 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 		vvalue = optarg;
 		break;
 	case 'h':
-		printf("Help menu\n");
-		return (1);
+		printf("Usage: LinzerSchnitteMidi  [-Dadsoprgbtw]\n");
+		printf("-D hardware device eg hw:0,1  Default= %s \n", hwdevice);
+		printf("-a Attack time in seconds     Default= %3.3f \n", attack);
+		printf("-d Decay time in seconds      Default= %3.3f \n", decay);
+		printf("-s Sustain level 0-1          Default= %3.3f \n", sustain);
+		printf("-o Release time               Default= %3.3f \n", release);
+		printf("-p Polyphony                  Default= %d \n", poly);
+		printf("-r Sample rate in Hz          Default= %d \n", rate);
+		printf("-g Gain level                 Default= %d \n", gain);
+		printf("-b Buffer/period size         Default= %d \n", buffer_size);
+		printf("-t base frequency             Default= %d \n", freq_start);
+		printf("-w Frequency step             Default= %d \n", freq_channel_width);
+		return(1);
 		break;
 	case 'a':
 		avalue = optarg;
@@ -297,19 +318,51 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 	default:
 		abort ();
 	}    
-    
-    printw("Using snd device   = %s \n", hwdevice);
-    printw("Using sample rate  = %d Hz\n", rate);
-    printw("Using Buffer size  = %5d samples\n", buffer_size);
-    printw("Using Attack of    = %3.3f seconds\n", attack);
-    printw("Using Decay of     = %3.3f seconds\n", decay);
-    printw("Using Sustain of   = %3.3f seconds\n", sustain);
-    printw("Using Release of   = %3.3f seconds\n", release);
-    printw("Using polyphony of = %5d tones\n", poly);
-    printw("Using gain of      = %5d \n", gain);
-    printw("Using base freq of = %5d Hz\n", freq_start);
-    printw("Using freq step of = %5d Hz\n", freq_channel_width);
+
+    initscr();				  /* start the curses setup */
+    atexit(do_endwin);
+    keypad(stdscr, TRUE);
+    noecho();
+//    scrollok(stdscr, TRUE);
     refresh();
+    start_color();
+    getmaxyx(stdscr,col,row);	
+
+
+    my_win = newwin(22, 60, 1, 0);
+    my_other_win = newwin(22, 20, 1 , 60);
+    refresh();
+
+    init_pair(1, COLOR_RED, COLOR_BLACK); 
+    init_pair(2, COLOR_YELLOW, COLOR_CYAN);
+    init_pair(3, COLOR_GREEN, COLOR_BLACK);
+    init_pair(4, COLOR_WHITE, COLOR_BLACK);
+    attron(A_BOLD);
+
+    attron(COLOR_PAIR(2));
+    mvprintw(0,(row/2)-17," LinzerSchnitte MIDI Sound Control ");
+    attroff(COLOR_PAIR(2));
+    attroff(A_BOLD);
+
+    scrollok(my_win, TRUE);
+    scrollok(my_other_win, FALSE);
+
+    attron(COLOR_PAIR(2));
+    wprintw(my_other_win,"Device:  %s \n", hwdevice);
+    wprintw(my_other_win,"Rate:    %d Hz\n", rate);
+    attron(COLOR_PAIR(2));
+    wprintw(my_other_win,"Buffer:  %4d \n", buffer_size);
+    wprintw(my_other_win,"Attack:  %3.3f sec\n", attack);
+    wprintw(my_other_win,"Decay:   %3.3f sec\n", decay);
+    wprintw(my_other_win,"Release: %3.3f sec\n", release);
+    wprintw(my_other_win,"Sustain: %3.3f\n", sustain);
+    wprintw(my_other_win,"Poly:  %4d tones\n", poly);
+    wprintw(my_other_win,"Gain:   %5d \n", gain);
+    wprintw(my_other_win,"Base freq:%4d Hz\n", freq_start);
+    wprintw(my_other_win,"Freq step:%4d Hz\n", freq_channel_width);
+    attroff(COLOR_PAIR(2));
+    refresh();
+    wrefresh(my_other_win);
 
 
 
