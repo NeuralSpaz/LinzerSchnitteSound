@@ -22,15 +22,15 @@ cd LinzerSchnitteSound/
 The following packages are required to build LinzerSchnitteSound:
 
 ```bash
-sudo apt-get install libasound2-dev
+sudo apt-get install libasound2-dev libncurses5-dev
 ```
 
 Compile LinzerSchnitteMidi as follows:
 
 ```bash
-gcc LinzerSchnitteMidibeta0.5.c -o LinzerSchnitteMidi -lm -lasound
+gcc LinzerSchnitteMidibeta0.7.c -o LinzerSchnitteMidi0.7 -lm -lasound -lcurses
 ```
-or
+or use 
 ```bash
 make
 ```
@@ -38,7 +38,7 @@ make
 
 ## Run LinzerSchnitteMidi on raspPi
 
- * ``` $ ./LinzerSchnitteMidi <hw:0,0,1> 0.001 0.001 1 0 ```
+ * ``` $ ./LinzerSchnitteMidi0.7 -D hw:0,0,1 ```
 
 to run a test use the provided test.midi
 
