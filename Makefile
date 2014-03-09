@@ -9,3 +9,4 @@ clean:
 	$(RM) LinzerSchnitteMidi
 	$(RM) LinzerSchnitteMidiTesting
 	$(RM) hw_params
+	$(RM) LinzerSchnitteMidi0.7
