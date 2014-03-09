@@ -1,9 +1,9 @@
 # build executable 
 all: LinzerSchnitteMidibeta0.5.c hw_params.c LinzerSchnitteMidibeta0.6.c
-	gcc -lm -lasound -o LinzerSchnitteMidi LinzerSchnitteMidibeta0.5.c 
-	gcc -lm -lasound -lcurses -o LinzerSchnitteMidiTesting LinzerSchnitteMidibeta0.6.c
-	gcc -lm -lasound -lcurses -o LinzerSchnitteMidi0.7 LinzerSchnitteMidibeta0.7.c 
-	gcc -lasound -o hw_params hw_params.c	
+	gcc LinzerSchnitteMidibeta0.5.c -o LinzerSchnitteMidi -lm -lasound
+	gcc LinzerSchnitteMidibeta0.6.c -o LinzerSchnitteMidiTesting -lm -lasound -lcurses 
+	gcc LinzerSchnitteMidibeta0.7.c -o LinzerSchnitteMidi0.7 -lm -lasound -lcurses
+	gcc hw_params.c -o hw_params -lasound	
 
 clean:
 	$(RM) LinzerSchnitteMidi
