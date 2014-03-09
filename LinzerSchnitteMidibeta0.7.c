@@ -122,8 +122,8 @@ int midi_callback() {
 			wattrset(my_win, COLOR_PAIR(3));			
 			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
 			wprintw(my_win,"Note %3d ON  ", note[l1]);
-			wprintw(my_win,"Velocity  %3.0f ", velocity[l1]*127);
-			wprintw(my_win,"Frequency %3.1f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
+			wprintw(my_win,"Frequency %6.0f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
 			refresh();
 			wrefresh(my_win);
 //			attroff(COLOR_PAIR(1));
@@ -143,8 +143,8 @@ int midi_callback() {
 			wattrset(my_win, COLOR_PAIR(1));			
 			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
 			wprintw(my_win,"Note %3d OFF ", note[l1]);
-			wprintw(my_win,"Velocity  %3.0f ", velocity[l1]*127);
-			wprintw(my_win,"Frequency %3.1f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
+			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
+			wprintw(my_win,"Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
 			refresh();
 			wrefresh(my_win);
                         env_time[l1] = 0;
@@ -340,7 +340,7 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
     attron(A_BOLD);
 
     attron(COLOR_PAIR(2));
-    mvprintw(0,(row/2)-17," LinzerSchnitte MIDI Sound Control ");
+    mvprintw(0,(row/2)-40,"                       LinzerSchnitte MIDI Sound Control                        ");
     attroff(COLOR_PAIR(2));
     attroff(A_BOLD);
 
