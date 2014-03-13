@@ -49,13 +49,13 @@ generate_samples()
     double sample_gain;
     double phase, sound, delta_phase;
 
-    sample_rate = 44100;
-    sample_gain = 1000;
+    sample_rate = rate;
+    sample_gain = gain;
 
     int i;
     int n;
     for (i=0; i<NOTES; i++){
-      note_frequency = (i*10)+300;
+      note_frequency = (i*freq_channel_width)+freq_start;
       delta_phase = (M_PI * note_frequency * 2) / sample_rate ;
       phase = 0;
       for (n=0; n<SAMPLES; n++ ){
