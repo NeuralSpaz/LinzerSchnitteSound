@@ -40,12 +40,12 @@ int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
 WINDOW *my_win, *my_other_win;
 
 int sample[NOTES][SAMPLES];
-int sample_offest[NOTES];
+int sample_offset[NOTES];
 
-generate_samples();
-   
-    double note_frequency;
-    double sample_rate;
+generate_samples()
+{
+    int note_frequency;
+    int sample_rate;
     double sample_gain;
     double phase, sound, delta_phase;
 
@@ -206,7 +206,7 @@ int playback_callback (snd_pcm_sframes_t nframes) {
 //                if (phi[l2] > 2.0 * M_PI) {
 //			phi[l2] -= 2.0 * M_PI;
 //		}
-		c = sample_offest[b];
+		c = sample_offset[b];
 		
                 sound = sample[b][c] * envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
                 if (sample_offset[b]<SAMPLES){
@@ -407,7 +407,7 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 
 
 
-
+    generate_samples();
  
     buf = (short *) malloc (2 * sizeof (short) * buffer_size);
     playback_handle = open_pcm(hwdevice);
