@@ -28,6 +28,9 @@
 #include <ncurses.h>
 #include <unistd.h>
 
+#define NOTES 128
+#define SAMPLES 4410
+
 snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
 short *buf;
@@ -36,6 +39,35 @@ int note[512], gate[512], note_active[512];
 int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
 WINDOW *my_win, *my_other_win;
 
+int sample[NOTES][SAMPLES];
+int sample_offest[NOTES];
+
+generate_samples();
+   
+    double note_frequency;
+    double sample_rate;
+    double sample_gain;
+    double phase, sound, delta_phase;
+
+    sample_rate = 44100;
+    sample_gain = 1000;
+
+    int i;
+    int n;
+    for (i=0; i<NOTES; i++){
+      note_frequency = (i*10)+300;
+      delta_phase = (M_PI * note_frequency * 2) / sample_rate ;
+      phase = 0;
+      for (n=0; n<SAMPLES; n++ ){
+        if (phase > 2 * M_PI) {
+            phase -= 2 * M_PI;
+          }
+        sound = sin(phase) * gain;
+        sample[i][n]= sound;
+        phase += delta_phase;
+      }
+    }
+}
 
 snd_seq_t *open_seq() {
 
@@ -119,13 +151,13 @@ int midi_callback() {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
 			velocity[l1] = velocity[l1] / 127;
-			wattrset(my_win, COLOR_PAIR(3));			
-			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
-			wprintw(my_win,"Note %3d ON  ", note[l1]);
-			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
-			wprintw(my_win,"Frequency %6.0f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
-			refresh();
-			wrefresh(my_win);
+//			wattrset(my_win, COLOR_PAIR(3));			
+//			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
+//			wprintw(my_win,"Note %3d ON  ", note[l1]);
+//			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
+//			wprintw(my_win,"Frequency %6.0f Hz \n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+//			refresh();
+//			wrefresh(my_win);
 //			attroff(COLOR_PAIR(1));
                         env_time[l1] = 0;
                         gate[l1] = 1;
@@ -140,13 +172,13 @@ int midi_callback() {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
 			velocity[l1] = velocity[l1] / 127;			
-			wattrset(my_win, COLOR_PAIR(1));			
-			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
-			wprintw(my_win,"Note %3d OFF ", note[l1]);
-			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
-			wprintw(my_win,"Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
-			refresh();
-			wrefresh(my_win);
+//			wattrset(my_win, COLOR_PAIR(1));			
+//			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
+//			wprintw(my_win,"Note %3d OFF ", note[l1]);
+//			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
+//			wprintw(my_win,"Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
+//			refresh();
+//			wrefresh(my_win);
                         env_time[l1] = 0;
                         gate[l1] = 0;
                     }
@@ -160,20 +192,29 @@ int midi_callback() {
 
 int playback_callback (snd_pcm_sframes_t nframes) {
 
-    int l1, l2;
+    int l1, l2, b ,c;
     double dphi, freq_note, sound;
 
     memset(buf, 0, nframes * 4);
     for (l2 = 0; l2 < poly; l2++) {
         if (note_active[l2]) {
-            freq_note = (note[l2]*freq_channel_width)+((128*freq_channel_width*midichannel[l2])+freq_start);
-            dphi = (M_PI * freq_note * 2) / (rate);
+//            freq_note = (note[l2]*freq_channel_width)+((128*freq_channel_width*midichannel[l2])+freq_start);
+//            dphi = (M_PI * freq_note * 2) / (rate);
+	    b = note[l2];
 	    for (l1 = 0; l1 < nframes; l1++) {
-                phi[l2] += dphi;
-                if (phi[l2] > 2.0 * M_PI) {
-			phi[l2] -= 2.0 * M_PI;
-		}
-                sound = gain * sin(phi[l2])* envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
+//                phi[l2] += dphi;
+//                if (phi[l2] > 2.0 * M_PI) {
+//			phi[l2] -= 2.0 * M_PI;
+//		}
+		c = sample_offest[b];
+		
+                sound = sample[b][c] * envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
+                if (sample_offset[b]<SAMPLES){
+		   ++sample_offset[b];
+                }
+                else {
+                   sample_offset[b] = 0;
+                }
                 env_time[l2] += 1.0 / rate;
                 buf[2 * l1] += sound;
                 buf[2 * l1 + 1] += sound;
