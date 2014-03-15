@@ -1,0 +1,9 @@
+- UDP truncation: can be detected by using recvmsg() and watching for
+  MSG_TRUNC flag. But the truncated data is usually lost, so what
+  should we do in this case?
+- What to do with big sysex data? What does ipMIDI do?
+- besser beschreiben, dass mit IP multicast nur das lokale netzwerk erreichbar
+  ist. deswegen gibt es auch keine commandline parameter um etwas zu konfigu-
+  rieren
+- http://www.musiclab.com/products/rpl_info.htm
+- use a general file/file descriptor for midi data (OSS raw midi or serial port)

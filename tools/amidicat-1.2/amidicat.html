@@ -1,0 +1,148 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>amidicat</title><meta name="generator" content="DocBook XSL Stylesheets V1.75.2"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div lang="en" class="refentry" title="amidicat"><a name="amidicat"></a><div class="titlepage"></div><div class="refnamediv"><h2>Name</h2><p>amidicat &#8212; Hooks up standard input and standard output to the ALSA MIDI sequencer</p></div><div class="refsynopsisdiv" title="Synopsis"><a name="amidicat.synopsis"></a><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">amidicat</code>  [--help] [--version] [--list] [--name <em class="replaceable"><code>STRING</code></em>] [--port <em class="replaceable"><code>CLIENT:PORT</code></em>] [--addr <em class="replaceable"><code>CLIENT:PORT</code></em>] [--hex] [--verbose] [--nowrite] [--noread] [--delay <em class="replaceable"><code>MILLISECONDS</code></em>] [--wait <em class="replaceable"><code>SECONDS</code></em>] [file...]</p></div></div><div class="refsect1" title="Arguments"><a name="amidicat.options"></a><h2>Arguments</h2><p>All of the following arguments are optional:</p><div class="variablelist"><dl><dt><span class="term"><code class="option">--help</code></span></dt><dd><p>Displays a help screen, then exits.  It is a
+quick summary of the documentation you are now reading.</p></dd><dt><span class="term"><code class="option">--version</code></span></dt><dd><p>Displays version number, then exits.
+Currently version 1.2.</p></dd><dt><span class="term"><code class="option">--list</code></span></dt><dd><p>Shows a listing of all ALSA MIDI sequencer devices
+currently available for use, then exits.
+</p><p>Devices are displayed one per line,
+containing
+ALSA port number (CLIENT:PORT syntax), client name, port name, and
+flags.  The flags are:
+</p><div class="variablelist"><dl><dt><span class="term"><code class="literal">r</code></span></dt><dd><p>Device can be directly read from</p></dd><dt><span class="term"><code class="literal">w</code></span></dt><dd><p>Device can be directly written to</p></dd><dt><span class="term"><code class="literal">R</code></span></dt><dd><p>Device can be read from, either directly or via ALSA read subscription</p></dd><dt><span class="term"><code class="literal">W</code></span></dt><dd><p>Device can be written to, either directly or via ALSA write subscription</p></dd></dl></div></dd><dt><span class="term"><code class="option">--name <em class="replaceable"><code>STRING</code></em></code></span></dt><dd><p>Sets the client name of this program's ALSA connection.  This might be
+helpful to identify the aMIDIcat port number, when using
+other applications.
+</p><p>The effects of setting this option can be observed
+in the <code class="option">--list</code> output.  The default client name is <span class="quote">&#8220;<span class="quote">aMIDIcat</span>&#8221;</span>.
+</p></dd><dt><span class="term"><code class="option">--port <em class="replaceable"><code>CLIENT:PORT</code></em></code>, </span><span class="term"><code class="option">--addr <em class="replaceable"><code>CLIENT:PORT</code></em></code></span></dt><dd><p>Makes a direct connection to the given ALSA port number, for reading and
+writing.  If this option is not given, the default is to only set up a
+passive connection for use with the ALSA subscription mechanism.
+</p><p>The parameter is either a numeric <em class="replaceable"><code>CLIENT:PORT</code></em>
+(example: <code class="literal">128:0</code>), or the client name or port name of
+another program's ALSA connection (use the <code class="option">--list</code> option to
+see what is available).  If the name contains spaces, remember to put it in quotes.
+</p><p>The <code class="option">--port</code> and <code class="option">--addr</code> options
+are identical.  For syntax compatibility
+with other ALSA programs, you have the choice of using either, but only
+one of these options may be given.
+</p></dd><dt><span class="term"><code class="option">--hex</code></span></dt><dd><p>Changes the syntax of input and output, to be human-readable hex digits,
+optionally separated by whitespace.  This option applies to all input files.  If this
+option is not given, the default is raw binary data.
+</p><p>Hex digits must be in the range <code class="literal">0</code> through <code class="literal">9</code>,
+<code class="literal">A</code> through <code class="literal">F</code>, or <code class="literal">a</code>
+through <code class="literal">f</code>.  Bytes are optionally separated by whitespace.  If
+whitespace is not given, every two hex digits represent a byte.  An error happens
+if input is not a hex digit or whitespace.
+</p><p>With this option, the MIDI output data will be grouped.  Each MIDI
+event will be separated by a newline character, but each individual byte within the
+event will only be separated by a space.  This makes it easy to observe the individual
+MIDI events.
+</p></dd><dt><span class="term"><code class="option">--verbose</code></span></dt><dd><p>Provides additional output, on standard error.  This option is highly
+recommended.
+</p><p>Among other useful things, it displays this program's ALSA port number,
+once the connection to ALSA is made.  So, if you start another ALSA program afterwards,
+with the intention of connecting to this program, you will know what port number to use.
+</p></dd><dt><span class="term"><code class="option">--nowrite</code></span></dt><dd><p>Disables writing data into ALSA from standard input.  When this option is used,
+no input files may be given on the command line.
+</p><p>The intent of this option is to allow
+a read-only connection to devices that do not give write permission.  These devices
+can be identified in the <code class="option">--list</code> output, as they do not have
+the <code class="literal">w</code> or <code class="literal">W</code> flags.
+</p></dd><dt><span class="term"><code class="option">--noread</code></span></dt><dd><p>Disables reading data out of ALSA to standard output.
+This option can not be combined with the <code class="option">--nowrite</code> option.
+</p><p>The intent of this option is to allow
+a write-only connection to devices that do not give read permission.  These devices
+can be identified in the <code class="option">--list</code> output, as they do not have
+the <code class="literal">r</code> or <code class="literal">R</code> flags.
+</p></dd><dt><span class="term"><code class="option">--delay</code> <em class="replaceable"><code>MILLISECONDS</code></em></span></dt><dd><p>Inserts a delay, in milliseconds, between each MIDI event written
+to ALSA from input.
+</p><p>This is useful for avoiding event loss due to ALSA queue congestion.  Although
+this program tries to avoid overflowing ALSA's internal buffer, events
+will still be lost if they arrive too quickly.  Unlike other MIDI programs, this
+program does not take any tempo or other timing information at all into account,
+and will write data into ALSA
+as quickly as it is read from input.  So, when using this program, event overflow
+is highly likely, unless this option is used.
+</p><p>This option will slow down the processing of input.  A value of 10 milliseconds
+is usually sufficient to avoid event loss.  When
+using the <code class="option">--verbose</code> option, total counts of events processed will be
+output when this program exits, so
+these counters can be used to verify that no events were lost.
+</p></dd><dt><span class="term"><code class="option">--wait</code> <em class="replaceable"><code>SECONDS</code></em></span></dt><dd><p>After all input has finished being processed, continue running this program
+for the given number of seconds, then exit.  This option can not be combined
+with the <code class="option">--nowrite</code> option.
+</p><p>Unless this option is given, this program will exit immediately after completing
+all input.  This includes processing all input files, and reaching EOF on
+standard input, if standard input is being used.
+</p><p>This option is useful for allowing some additional time for MIDI data to be
+received from ALSA.  For example, this might be useful for sending
+MIDI commands to a synthesizer, and then waiting for any responses to come back.
+</p></dd></dl></div><p>
+Everything else on the command line is interpreted as the filename of an
+input file.  The special filename <code class="filename"><code class="literal">-</code></code> represents
+standard input.  Filenames are processed left to right, so this can
+be used to insert other files before or after standard input.  If no
+filenames are given on the command line, standard input is the default.
+</p></div><div class="refsect1" title="Description"><a name="amidicat.description"></a><h2>Description</h2><p>
+  <span class="command"><strong>aMIDIcat</strong></span> hooks up standard input and standard output to the ALSA MIDI sequencer.
+Like <span class="citerefentry"><span class="refentrytitle">cat</span>(1)</span>, this program will concatenate multiple input files together.
+ </p></div><div class="refsect1" title="Examples"><a name="amidicat.example"></a><h2>Examples</h2><p>All of these examples use the <span class="command"><strong>TiMidity</strong></span> software synthesizer.  Change
+the <span class="command"><strong>--port "TiMidity"</strong></span> parameter to use anything else you have.  If you are
+using a real hardware synthesizer, use caution
+when trying the examples that generate random data or play arbitrary files, as they
+could send unwanted SysEx commands.
+</p><div class="example"><a name="id468710"></a><p class="title"><b>Example 1. List all ALSA sequencer devices</b></p><div class="example-contents"><p>
+<span class="command"><strong>amidicat -l</strong></span>
+</p><p>This will list all MIDI devices on your system that are
+visible to the ALSA sequencer.  Here is sample output:
+</p><pre class="screen">
+ Port    Client name                      Port name                        RW
+  0:0    System                           Timer                            Rw
+  0:1    System                           Announce                         R 
+ 14:0    Midi Through                     Midi Through Port-0              RW
+ 15:0    OSS sequencer                    Receiver                          w
+128:0    TiMidity                         TiMidity port 0                   W
+128:1    TiMidity                         TiMidity port 1                   W
+128:2    TiMidity                         TiMidity port 2                   W
+128:3    TiMidity                         TiMidity port 3                   W
+129:0    aMIDIcat                         aMIDIcat                         RW</pre><p>
+</p></div></div><br class="example-break"><div class="example"><a name="id468741"></a><p class="title"><b>Example 2. Play MIDI files very quickly</b></p><div class="example-contents"><p>
+<span class="command"><strong>amidicat --port "TiMidity" --delay 10 *.mid</strong></span>
+</p><p>This will play all MIDI files in the current directory very quickly,
+without regard for tempo.  The <code class="literal">.mid</code> file format will not be
+recognized, so headers and other information will play as garbage.  This would
+be more useful for files containing nothing but raw MIDI data, perhaps
+SysEx commands that you wish to load into a hardware synth.
+</p></div></div><br class="example-break"><div class="example"><a name="id468768"></a><p class="title"><b>Example 3. A better "beep" command</b></p><div class="example-contents"><p>
+<span class="command"><strong>echo "903C7F" | amidicat --port "TiMidity" --hex</strong></span>
+</p><p>This plays Middle C.  It's easy to elaborate on this.  If you have
+an application that makes many beeps, replacing the beeps with MIDI can
+make it more pleasant-sounding.
+</p></div></div><br class="example-break"><div class="example"><a name="id468787"></a><p class="title"><b>Example 4. Transport MIDI data over the network</b></p><div class="example-contents"><p>
+<span class="command"><strong>nc -v -l -p 12345 | amidicat --port "TiMidity"</strong></span>
+</p><p>This command sets up a server listening on port 12345.  Now,
+from somewhere else
+on the Internet, use <span class="command"><strong>nc</strong></span> to connect to port 12345
+of this machine running <span class="command"><strong>amidicat</strong></span>, and start sending
+it MIDI data.  It should play.
+</p></div></div><br class="example-break"><div class="example"><a name="id468816"></a><p class="title"><b>Example 5. Stress-test your softsynth by playing random data</b></p><div class="example-contents"><p>
+<span class="command"><strong>cat /dev/urandom | amidicat --port "TiMidity" --delay 1</strong></span>
+</p><p>Turn down your speakers before trying this.  The <code class="literal">delay</code> parameter
+is necessary to avoid
+flooding ALSA with a deluge of random data.  Do not use this with a
+real hardware synthesizer,
+or you could damage your settings if, by bad luck, a random SysEx
+command is formed!
+Hit Control-C to stop the program, and you might get to hear a rather
+interesting sound effect that was caused by playing random data.
+</p></div></div><br class="example-break"><div class="example"><a name="id468843"></a><p class="title"><b>Example 6. Panic button</b></p><div class="example-contents"><p>
+<span class="command"><strong>perl -e 'use bytes;for($i=0;$i&lt;16;$i++){print chr(176+$i).chr(120).chr(0);}' | amidicat --port "TiMidity"</strong></span>
+</p><p>This Perl one-liner sends MIDI "All Sound Off" commands to every channel.
+It should silence all audio currently being played.
+You will want to use this command after playing the stress-test above :)
+</p></div></div><br class="example-break"><div class="example"><a name="id468864"></a><p class="title"><b>Example 7. Another panic button</b></p><div class="example-contents"><p>
+<span class="command"><strong>perl -e 'use bytes;for($i=0;$i&lt;16;$i++){for($j=0;$j&lt;128;$j++){print chr(128+$i).chr($j).chr(127);}}' | amidicat --port "TiMidity"</strong></span>
+</p><p>Another Perl one-liner, which sends all individual "Note Off" commands.  It is slower than
+the above, but perhaps useful for
+an older synth that doesn't understand the "All Sound Off" command.
+</p></div></div><br class="example-break"></div><div class="refsect1" title="See also"><a name="amidicat.seealso"></a><h2>See also</h2><p>
+  <span class="citerefentry"><span class="refentrytitle">amidi</span>(1)</span>,
+  <span class="citerefentry"><span class="refentrytitle">aconnect</span>(1)</span>
+ </p></div></div></body></html>

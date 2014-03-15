@@ -1,0 +1,12 @@
+1.2 2010-11-03
+* Bugfix: now properly opens ALSA port bidirectionally
+* Added this ChangeLog
+
+1.1 2010-06-17
+* Program renamed to amidicat from midicat, to avoid conflict
+  with something else that I was unaware of at the time
+* Proper packaging (Makefile, README, man page, etc.)
+* Initial release to website
+
+1.0 2010-04-30
+* Initial release to alsa-devel mailing list

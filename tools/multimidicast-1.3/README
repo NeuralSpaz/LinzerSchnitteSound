@@ -1,0 +1,14 @@
+multimidicast v1.3 (c) 2005..2011 by Dirk Jagdmann <doj@cubic.org>
+-------------------------------------------------------------------
+
+Will send and receive MIDI data from ALSA sequencers to your network using
+UDP multicast. If this does not seem to work make sure that multicast
+is supported by your kernel.
+
+The software is designed to be compatible with ipMIDI for windows from
+http://nerds.de
+
+Command line options:
+-i <interface> - use specific network interface
+-q - quiet, don't show MIDI and network events
+-b <bytes> - set MIDI buffer size, default: 250000 bytes

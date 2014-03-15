@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE refentry PUBLIC
+ "-//OASIS//DTD DocBook XML V4.5//EN"
+ "/usr/share/sgml/docbook/xml-dtd-4.5/docbookx.dtd"
+[
+<!ENTITY product "amidicat">
+]>
+
+<refentry id="amidicat" lang="en">
+ 
+<refentryinfo>
+ <productname>&product;</productname>
+ <authorgroup>
+  <author>
+   <contrib>Author</contrib>
+   <firstname>Josh</firstname>
+   <surname>Lehan</surname>
+   <email>amidicat@krellan.com</email>
+  </author>
+ </authorgroup>
+</refentryinfo>
+
+<refmeta>
+ <refentrytitle>&product;</refentrytitle>
+ <manvolnum>1</manvolnum>
+ <refmiscinfo class="version">@VERSION@</refmiscinfo>
+ <refmiscinfo class="source">aMIDIcat</refmiscinfo>
+ <refmiscinfo class="manual">aMIDIcat</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+ <refname>&product;</refname>
+ <refpurpose>Hooks up standard input and standard output to the ALSA MIDI sequencer</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv id="amidicat.synopsis">
+ <title>Synopsis</title>
+ <cmdsynopsis>
+  <command>amidicat</command>
+  <arg choice="opt">--help</arg>
+  <arg choice="opt">--version</arg>
+  <arg choice="opt">--list</arg>
+  <arg choice="opt">--name <replaceable>STRING</replaceable></arg>
+  <arg choice="opt">--port <replaceable>CLIENT:PORT</replaceable></arg>
+  <arg choice="opt">--addr <replaceable>CLIENT:PORT</replaceable></arg>
+  <arg choice="opt">--hex</arg>
+  <arg choice="opt">--verbose</arg>
+  <arg choice="opt">--nowrite</arg>
+  <arg choice="opt">--noread</arg>
+  <arg choice="opt">--delay <replaceable>MILLISECONDS</replaceable></arg>
+  <arg choice="opt">--wait <replaceable>SECONDS</replaceable></arg>
+  <arg choice="opt" rep="repeat">file</arg>
+ </cmdsynopsis>
+</refsynopsisdiv>
+
+<refsect1 id="amidicat.options">
+<title>Arguments</title>
+<para>All of the following arguments are optional:</para>
+
+<variablelist>
+
+<varlistentry>
+<term><option>--help</option></term>
+<listitem>
+<para>Displays a help screen, then exits.  It is a
+quick summary of the documentation you are now reading.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--version</option></term>
+<listitem>
+<para>Displays version number, then exits.
+Currently version @VERSION@.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--list</option></term>
+<listitem>
+<para>Shows a listing of all ALSA MIDI sequencer devices
+currently available for use, then exits.
+</para>
+<para>Devices are displayed one per line,
+containing
+ALSA port number (CLIENT:PORT syntax), client name, port name, and
+flags.  The flags are:
+</para>
+<variablelist>
+
+<varlistentry>
+<term><literal>r</literal></term>
+<listitem><para>Device can be directly read from</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>w</literal></term>
+<listitem><para>Device can be directly written to</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>R</literal></term>
+<listitem><para>Device can be read from, either directly or via ALSA read subscription</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><literal>W</literal></term>
+<listitem><para>Device can be written to, either directly or via ALSA write subscription</para></listitem>
+</varlistentry>
+
+</variablelist>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--name <replaceable>STRING</replaceable></option></term>
+<listitem>
+<para>Sets the client name of this program's ALSA connection.  This might be
+helpful to identify the aMIDIcat port number, when using
+other applications.
+</para>
+<para>The effects of setting this option can be observed
+in the <option>--list</option> output.  The default client name is <quote>aMIDIcat</quote>.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--port <replaceable>CLIENT:PORT</replaceable></option></term>
+<term><option>--addr <replaceable>CLIENT:PORT</replaceable></option></term>
+<listitem>
+<para>Makes a direct connection to the given ALSA port number, for reading and
+writing.  If this option is not given, the default is to only set up a
+passive connection for use with the ALSA subscription mechanism.
+</para>
+<para>The parameter is either a numeric <replaceable>CLIENT:PORT</replaceable>
+(example: <literal>128:0</literal>), or the client name or port name of
+another program's ALSA connection (use the <option>--list</option> option to
+see what is available).  If the name contains spaces, remember to put it in quotes.
+</para>
+<para>The <option>--port</option> and <option>--addr</option> options
+are identical.  For syntax compatibility
+with other ALSA programs, you have the choice of using either, but only
+one of these options may be given.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--hex</option></term>
+<listitem>
+<para>Changes the syntax of input and output, to be human-readable hex digits,
+optionally separated by whitespace.  This option applies to all input files.  If this
+option is not given, the default is raw binary data.
+</para>
+<para>Hex digits must be in the range <literal>0</literal> through <literal>9</literal>,
+<literal>A</literal> through <literal>F</literal>, or <literal>a</literal>
+through <literal>f</literal>.  Bytes are optionally separated by whitespace.  If
+whitespace is not given, every two hex digits represent a byte.  An error happens
+if input is not a hex digit or whitespace.
+</para>
+<para>With this option, the MIDI output data will be grouped.  Each MIDI
+event will be separated by a newline character, but each individual byte within the
+event will only be separated by a space.  This makes it easy to observe the individual
+MIDI events.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--verbose</option></term>
+<listitem>
+<para>Provides additional output, on standard error.  This option is highly
+recommended.
+</para>
+<para>Among other useful things, it displays this program's ALSA port number,
+once the connection to ALSA is made.  So, if you start another ALSA program afterwards,
+with the intention of connecting to this program, you will know what port number to use.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--nowrite</option></term>
+<listitem>
+<para>Disables writing data into ALSA from standard input.  When this option is used,
+no input files may be given on the command line.
+</para>
+<para>The intent of this option is to allow
+a read-only connection to devices that do not give write permission.  These devices
+can be identified in the <option>--list</option> output, as they do not have
+the <literal>w</literal> or <literal>W</literal> flags.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--noread</option></term>
+<listitem>
+<para>Disables reading data out of ALSA to standard output.
+This option can not be combined with the <option>--nowrite</option> option.
+</para>
+<para>The intent of this option is to allow
+a write-only connection to devices that do not give read permission.  These devices
+can be identified in the <option>--list</option> output, as they do not have
+the <literal>r</literal> or <literal>R</literal> flags.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--delay</option> <replaceable>MILLISECONDS</replaceable></term>
+<listitem>
+<para>Inserts a delay, in milliseconds, between each MIDI event written
+to ALSA from input.
+</para>
+<para>This is useful for avoiding event loss due to ALSA queue congestion.  Although
+this program tries to avoid overflowing ALSA's internal buffer, events
+will still be lost if they arrive too quickly.  Unlike other MIDI programs, this
+program does not take any tempo or other timing information at all into account,
+and will write data into ALSA
+as quickly as it is read from input.  So, when using this program, event overflow
+is highly likely, unless this option is used.
+</para>
+<para>This option will slow down the processing of input.  A value of 10 milliseconds
+is usually sufficient to avoid event loss.  When
+using the <option>--verbose</option> option, total counts of events processed will be
+output when this program exits, so
+these counters can be used to verify that no events were lost.
+</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>--wait</option> <replaceable>SECONDS</replaceable></term>
+<listitem>
+<para>After all input has finished being processed, continue running this program
+for the given number of seconds, then exit.  This option can not be combined
+with the <option>--nowrite</option> option.
+</para>
+<para>Unless this option is given, this program will exit immediately after completing
+all input.  This includes processing all input files, and reaching EOF on
+standard input, if standard input is being used.
+</para>
+<para>This option is useful for allowing some additional time for MIDI data to be
+received from ALSA.  For example, this might be useful for sending
+MIDI commands to a synthesizer, and then waiting for any responses to come back.
+</para>
+</listitem>
+</varlistentry>
+
+</variablelist>
+  
+<para>
+Everything else on the command line is interpreted as the filename of an
+input file.  The special filename <filename><literal>-</literal></filename> represents
+standard input.  Filenames are processed left to right, so this can
+be used to insert other files before or after standard input.  If no
+filenames are given on the command line, standard input is the default.
+</para>
+
+</refsect1>
+
+<refsect1 id="amidicat.description">
+ <title>Description</title>
+ <para>
+  <command>aMIDIcat</command> hooks up standard input and standard output to the ALSA MIDI sequencer.
+Like <citerefentry>
+<refentrytitle>cat</refentrytitle>
+<manvolnum>1</manvolnum>
+</citerefentry>, this program will concatenate multiple input files together.
+ </para>
+</refsect1>
+
+<refsect1 id="amidicat.example">
+<title>Examples</title>
+
+<para>All of these examples use the <command>TiMidity</command> software synthesizer.  Change
+the <command>--port "TiMidity"</command> parameter to use anything else you have.  If you are
+using a real hardware synthesizer, use caution
+when trying the examples that generate random data or play arbitrary files, as they
+could send unwanted SysEx commands.
+</para>
+
+<example>
+<title>List all ALSA sequencer devices</title>
+<para>
+<command>amidicat -l</command>
+</para>
+<para>This will list all MIDI devices on your system that are
+visible to the ALSA sequencer.  Here is sample output:
+<screen>
+ Port    Client name                      Port name                        RW
+  0:0    System                           Timer                            Rw
+  0:1    System                           Announce                         R 
+ 14:0    Midi Through                     Midi Through Port-0              RW
+ 15:0    OSS sequencer                    Receiver                          w
+128:0    TiMidity                         TiMidity port 0                   W
+128:1    TiMidity                         TiMidity port 1                   W
+128:2    TiMidity                         TiMidity port 2                   W
+128:3    TiMidity                         TiMidity port 3                   W
+129:0    aMIDIcat                         aMIDIcat                         RW</screen>
+</para>
+</example>
+
+<example>
+<title>Play MIDI files very quickly</title>
+<para>
+<command>amidicat --port "TiMidity" --delay 10 *.mid</command>
+</para>
+<para>This will play all MIDI files in the current directory very quickly,
+without regard for tempo.  The <literal>.mid</literal> file format will not be
+recognized, so headers and other information will play as garbage.  This would
+be more useful for files containing nothing but raw MIDI data, perhaps
+SysEx commands that you wish to load into a hardware synth.
+</para>
+</example>
+
+<example>
+<title>A better "beep" command</title>
+<para>
+<command>echo "903C7F" | amidicat --port "TiMidity" --hex</command>
+</para>
+<para>This plays Middle C.  It's easy to elaborate on this.  If you have
+an application that makes many beeps, replacing the beeps with MIDI can
+make it more pleasant-sounding.
+</para>
+</example>
+
+<example>
+<title>Transport MIDI data over the network</title>
+<para>
+<command>nc -v -l -p 12345 | amidicat --port "TiMidity"</command>
+</para>
+<para>This command sets up a server listening on port 12345.  Now,
+from somewhere else
+on the Internet, use <command>nc</command> to connect to port 12345
+of this machine running <command>amidicat</command>, and start sending
+it MIDI data.  It should play.
+</para>
+</example>
+
+<example>
+<title>Stress-test your softsynth by playing random data</title>
+<para>
+<command>cat /dev/urandom | amidicat --port "TiMidity" --delay 1</command>
+</para>
+<para>Turn down your speakers before trying this.  The <literal>delay</literal> parameter
+is necessary to avoid
+flooding ALSA with a deluge of random data.  Do not use this with a
+real hardware synthesizer,
+or you could damage your settings if, by bad luck, a random SysEx
+command is formed!
+Hit Control-C to stop the program, and you might get to hear a rather
+interesting sound effect that was caused by playing random data.
+</para>
+</example>
+
+<example>
+<title>Panic button</title>
+<para>
+<command>perl -e &apos;use bytes;for($i=0;$i&lt;16;$i++){print chr(176+$i).chr(120).chr(0);}&apos; | amidicat --port "TiMidity"</command>
+</para>
+<para>This Perl one-liner sends MIDI "All Sound Off" commands to every channel.
+It should silence all audio currently being played.
+You will want to use this command after playing the stress-test above :)
+</para>
+</example>
+
+<example>
+<title>Another panic button</title>
+<para>
+<command>perl -e &apos;use bytes;for($i=0;$i&lt;16;$i++){for($j=0;$j&lt;128;$j++){print chr(128+$i).chr($j).chr(127);}}&apos; | amidicat --port "TiMidity"</command>
+</para>
+<para>Another Perl one-liner, which sends all individual "Note Off" commands.  It is slower than
+the above, but perhaps useful for
+an older synth that doesn't understand the "All Sound Off" command.
+</para>
+</example>
+</refsect1>
+
+<refsect1 id="amidicat.seealso">
+ <title>See also</title>
+ <para>
+  <citerefentry>
+   <refentrytitle>amidi</refentrytitle>
+   <manvolnum>1</manvolnum>
+  </citerefentry>,
+  <citerefentry>
+   <refentrytitle>aconnect</refentrytitle>
+   <manvolnum>1</manvolnum>
+  </citerefentry>
+ </para>
+</refsect1>
+
+</refentry>

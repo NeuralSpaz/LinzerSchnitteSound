@@ -1,0 +1,37 @@
+Hi!  A few months ago, I posted about a program to send untimed MIDI data to the ALSA sequencer.  Using amidi(1) wasn't acceptable, since it only talks to "RawMIDI" devices.  Using aplaymidi(1) wasn't acceptable either, because it required .MID files, and I simply wanted to send untimed MIDI data, similar to what would be produced if you hooked up a hardware MIDI keyboard and just started playing.
+
+I needed something more general, that would simply connect to the ALSA sequencer, and let me send arbitrary MIDI bytes to a sequencer destination of my choice.  Unfortunately, no program existed that would simply do this.
+
+I'm pleased to announce that I've written such a program.
+
+It's called aMIDIcat, as it works on the same principle as "cat" and other similar programs (Netcat, and so on).
+
+It hooks up standard input, and standard output, to the ALSA sequencer.
+
+This makes it easy to pipe data around.
+
+It's an ALSA sequencer client.  Any data that is received on standard input will be forwarded into ALSA.  You can choose another client as a destination, or you can just start the program passively and use ALSA's "subscription" mechanism to route the data later.
+
+Similarly, any MIDI data that comes from ALSA, will be forwarded along, and provided on standard output.
+
+This makes it easy to make many small "one-liner" command lines that are useful for testing and playing around with MIDI data in general.
+
+As an example, this plays Middle C:
+
+echo "90 3C 7F" | amidicat --hex --port "TiMidity"
+
+The --hex option makes things more human-readable: standard input and output are hex digits, separated by spaces, instead of just raw binary data.
+
+The --port option has the usual ALSA sequencer meaning.  Change it to target your synthesizer (I'm using the TiMidity softsynth).
+
+There's many other options.  A manpage is included, which also contains many other examples.
+
+Standard input and standard output can both run at the same time (it's multithreaded).
+
+For now, the program is available here, on my Web server:
+
+http://krellan.com/amidicat
+
+If you're interested, try it, and let me know what you think!
+
+Josh Lehan
