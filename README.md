@@ -28,7 +28,7 @@ sudo apt-get install libasound2-dev libncurses5-dev
 Compile LinzerSchnitteMidi as follows:
 
 ```bash
-gcc LinzerSchnitteMidibeta0.7.c -o LinzerSchnitteMidi0.7 -lm -lasound -lcurses
+gcc LinzerSchnitteMidibeta0.7.c -o LinzerSchnitteMidi0.7 -lm -lasound
 ```
 or use 
 ```bash
@@ -42,7 +42,7 @@ make
 
 to run a test use the provided test.midi
 
- * ``` $ aplaymidi --port LinzerSchnitteMIDI test.midi ```
+ * ``` $ aplaymidi --port LSMidi test.midi ```
 
 You may have to adjust your alsa setting. 
 

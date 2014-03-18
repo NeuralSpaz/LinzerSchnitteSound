@@ -75,18 +75,18 @@ snd_seq_t *open_seq() {
     snd_seq_t *seq_handle;
 
     if (snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0) < 0) {
-	attron(COLOR_PAIR(1));
+//	attron(COLOR_PAIR(1));
         printf("\n Error opening ALSA sequencer.\n");
-        attroff(COLOR_PAIR(1));
+//        attroff(COLOR_PAIR(1));
         exit(1);
     }
-    snd_seq_set_client_name(seq_handle, "LSMin");
-    if (snd_seq_create_simple_port(seq_handle, "LSMin",
+    snd_seq_set_client_name(seq_handle, "LSMidi");
+    if (snd_seq_create_simple_port(seq_handle, "LSMidi",
         SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
         SND_SEQ_PORT_TYPE_APPLICATION) < 0) {
-	attron(COLOR_PAIR(1));
+//	attron(COLOR_PAIR(1));
         printf("\n Error creating sequencer port.\n");
-	attroff(COLOR_PAIR(1));
+//	attroff(COLOR_PAIR(1));
         exit(1);
     }
     return(seq_handle);
@@ -99,9 +99,9 @@ snd_pcm_t *open_pcm(char *pcm_name) {
     snd_pcm_sw_params_t *sw_params;
 
     if (snd_pcm_open (&playback_handle, pcm_name, SND_PCM_STREAM_PLAYBACK, 0) < 0) {
-	attron(COLOR_PAIR(1));
+//	attron(COLOR_PAIR(1));
 	printf("\n Error: cannot open audio device %s\n\n", pcm_name);
-        attroff(COLOR_PAIR(1));
+//        attroff(COLOR_PAIR(1));
         exit (1);
     }
     snd_pcm_hw_params_alloca(&hw_params);
