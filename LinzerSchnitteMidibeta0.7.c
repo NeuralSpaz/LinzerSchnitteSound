@@ -1,3 +1,4 @@
+
 /*
     LinzerSchnitte Midi Sound Server - Midi Interface for generating pure tones for controlling LinzerSchnitte
     Copyright (C) 2014  Josh Gardiner
@@ -25,11 +26,11 @@
 #include <stdlib.h>
 #include <alsa/asoundlib.h>
 #include <math.h>
-#include <ncurses.h>
+//#include <ncurses.h>
 #include <unistd.h>
 
 #define NOTES 128
-#define SAMPLES 4410
+#define SAMPLES 480
 
 snd_seq_t *seq_handle;
 snd_pcm_t *playback_handle;
@@ -75,7 +76,7 @@ snd_seq_t *open_seq() {
 
     if (snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0) < 0) {
 	attron(COLOR_PAIR(1));
-        printw("\n Error opening ALSA sequencer.\n");
+        printf("\n Error opening ALSA sequencer.\n");
         attroff(COLOR_PAIR(1));
         exit(1);
     }
@@ -84,7 +85,7 @@ snd_seq_t *open_seq() {
         SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
         SND_SEQ_PORT_TYPE_APPLICATION) < 0) {
 	attron(COLOR_PAIR(1));
-        printw("\n Error creating sequencer port.\n");
+        printf("\n Error creating sequencer port.\n");
 	attroff(COLOR_PAIR(1));
         exit(1);
     }
@@ -99,7 +100,7 @@ snd_pcm_t *open_pcm(char *pcm_name) {
 
     if (snd_pcm_open (&playback_handle, pcm_name, SND_PCM_STREAM_PLAYBACK, 0) < 0) {
 	attron(COLOR_PAIR(1));
-	printw("\n Error: cannot open audio device %s\n\n", pcm_name);
+	printf("\n Error: cannot open audio device %s\n\n", pcm_name);
         attroff(COLOR_PAIR(1));
         exit (1);
     }
@@ -159,6 +160,10 @@ int midi_callback() {
 //			refresh();
 //			wrefresh(my_win);
 //			attroff(COLOR_PAIR(1));
+			printf("CH %2.0f ", midichannel[l1]+1);
+			printf("Note %3d ON ", note[l1]);
+			printf("Vel %3.0f ", velocity[l1]*127);
+			printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
                         env_time[l1] = 0;
                         gate[l1] = 1;
                         note_active[l1] = 1;
@@ -171,14 +176,18 @@ int midi_callback() {
                     if (gate[l1] && note_active[l1] && (note[l1] == ev->data.note.note)) {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
-			velocity[l1] = velocity[l1] / 127;			
-//			wattrset(my_win, COLOR_PAIR(1));			
+			velocity[l1] = velocity[l1] / 127;
+//			wattrset(my_win, COLOR_PAIR(1));
 //			wprintw(my_win,"CH %2.0f ", midichannel[l1]+1);
 //			wprintw(my_win,"Note %3d OFF ", note[l1]);
 //			wprintw(my_win,"Velocity %3.0f ", velocity[l1]*127);
-//			wprintw(my_win,"Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );			
+//			wprintw(my_win,"Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
 //			refresh();
 //			wrefresh(my_win);
+			printf("CH %2.0f ", midichannel[l1]+1);
+			printf("Note %3d OFF ", note[l1]);
+			printf("Vel %3.0f ", velocity[l1]*127);
+			printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
                         env_time[l1] = 0;
                         gate[l1] = 0;
                     }
@@ -198,18 +207,11 @@ int playback_callback (snd_pcm_sframes_t nframes) {
     memset(buf, 0, nframes * 4);
     for (l2 = 0; l2 < poly; l2++) {
         if (note_active[l2]) {
-//            freq_note = (note[l2]*freq_channel_width)+((128*freq_channel_width*midichannel[l2])+freq_start);
-//            dphi = (M_PI * freq_note * 2) / (rate);
 	    b = note[l2];
 	    for (l1 = 0; l1 < nframes; l1++) {
-//                phi[l2] += dphi;
-//                if (phi[l2] > 2.0 * M_PI) {
-//			phi[l2] -= 2.0 * M_PI;
-//		}
 		c = sample_offset[b];
-		
                 sound = sample[b][c] * envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
-                if (sample_offset[b]<SAMPLES){
+                if (sample_offset[b]!=(SAMPLES-1)){
 		   ++sample_offset[b];
                 }
                 else {
@@ -223,14 +225,15 @@ int playback_callback (snd_pcm_sframes_t nframes) {
     }
     return snd_pcm_writei (playback_handle, buf, nframes);
 }
-
-void do_endwin(void) 
+/*
+void do_endwin(void)
 {
     printw("Press any key to end the program...");
     refresh();
     getch();
     endwin();
 }
+*/
 
 int main (int argc, char *argv[]) {
 
@@ -243,8 +246,7 @@ int main (int argc, char *argv[]) {
 //    width = 20;
 
     int nfds, seq_nfds, l1;
-    int key;
-    key=0;
+
     char *hwdevice;
     char *Dvalue = NULL;
     char *pvalue = NULL;
@@ -269,15 +271,15 @@ int main (int argc, char *argv[]) {
     struct pollfd *pfds;
 
 /* Set default */    
-    hwdevice = "hw:0,0,1";    //case D
-    attack = 0.001;           //case a
-    decay = 0.001;            //case d
+    hwdevice = "hw:0";        //case D
+    attack = 0.002;           //case a
+    decay = 0.002;            //case d
     sustain = 1;              //case s
-    release = 0.001;          //case o
+    release = 0.002;          //case o
     poly = 3;                 //case p
-    rate = 44100;             //case r
+    rate = 48000;             //case r
     gain = 1000;	      //case g
-    buffer_size = 1024;	      //case b
+    buffer_size = 512;	      //case b
     freq_start = 300;         //case t
     freq_channel_width = 100; //case w
 	
@@ -297,17 +299,17 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 		break;
 	case 'h':
 		printf("Usage: LinzerSchnitteMidi  [-Dadsoprgbtw]\n");
-		printf("-D hardware device eg hw:0,1  Default= %s \n", hwdevice);
+		printf("-D hardware device eg hw:0,0,1  Default= %s \n", hwdevice);
 		printf("-a Attack time in seconds     Default= %3.3f \n", attack);
 		printf("-d Decay time in seconds      Default= %3.3f \n", decay);
-		printf("-s Sustain level 0-1          Default= %3.3f \n", sustain);
+//		printf("-s Sustain level 0-1          Default= %3.3f \n", sustain);
 		printf("-o Release time               Default= %3.3f \n", release);
 		printf("-p Polyphony                  Default= %d \n", poly);
 		printf("-r Sample rate in Hz          Default= %d \n", rate);
 		printf("-g Gain level                 Default= %d \n", gain);
 		printf("-b Buffer/period size         Default= %d \n", buffer_size);
-		printf("-t base frequency             Default= %d \n", freq_start);
-		printf("-w Frequency step             Default= %d \n", freq_channel_width);
+//		printf("-t base frequency             Default= %d \n", freq_start);
+//		printf("-w Frequency step             Default= %d \n", freq_channel_width);
 		return(1);
 		break;
 	case 'a':
@@ -359,15 +361,15 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 	default:
 		abort ();
 	}    
-
-    initscr();				  /* start the curses setup */
+/*
+    initscr();				  //start the curses setup
     atexit(do_endwin);
     keypad(stdscr, TRUE);
     noecho();
 //    scrollok(stdscr, TRUE);
     refresh();
     start_color();
-    getmaxyx(stdscr,col,row);	
+    getmaxyx(stdscr,col,row);
 
 
     my_win = newwin(22, 60, 1, 0);
@@ -405,7 +407,7 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
     refresh();
     wrefresh(my_other_win);
 
-
+*/
 
     generate_samples();
  
