@@ -160,7 +160,7 @@ int midi_callback() {
 //			wrefresh(my_win);
 //			attroff(COLOR_PAIR(1));
 			printf("CH %2.0f ", midichannel[l1]+1);
-			printf("Note %3d ON ", note[l1]);
+			printf("Note %3d ON  ", note[l1]);
 			printf("Vel %3.0f ", velocity[l1]*127);
 			printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
                         env_time[l1] = 0;
