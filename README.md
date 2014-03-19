@@ -28,7 +28,7 @@ sudo apt-get install libasound2-dev libncurses5-dev
 Compile LinzerSchnitteMidi as follows:
 
 ```bash
-gcc LinzerSchnitteMidibeta0.7.c -o LinzerSchnitteMidi0.7 -lm -lasound
+gcc LinzerSchnitteMidibeta0.7.c -o LSMidi -lm -lasound
 ```
 or use 
 ```bash
@@ -38,7 +38,7 @@ make
 
 ## Run LinzerSchnitteMidi on raspPi
 
- * ``` $ ./LinzerSchnitteMidi0.7 -D hw:0,0,1 ```
+ * ``` $ ./LSMidi -D hw:0,0,1 ```
 
 to run a test use the provided test.midi
 
