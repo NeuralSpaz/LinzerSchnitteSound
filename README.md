@@ -37,6 +37,7 @@ make
 ```
 
 
+
 ## Run LinzerSchnitteMidi on raspPi
 
  * ``` $ ./LSMidi -D hw:0,0,1 ```
