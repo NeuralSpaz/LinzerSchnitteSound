@@ -4,7 +4,7 @@ LinzerSchnitteMidi generate pure tones using a MIDI interface for controlling Li
 
 For more information on the LinzerSchnitte Project:
 
-[Please see the LinzerSchnitte Receiver Repo] (https://github.com/RayGardiner/LinzerSchnitte-)
+[Please see the other LinzerSchnitte Receiver Repos] (https://github.com/LinzerSchnitte)
 
 [Please see the LinzerSchnitte Wiki] (http://www.aec.at/linzerschnitte/wiki/index.php/Main_Page)
 
@@ -13,8 +13,9 @@ For more information on the LinzerSchnitte Project:
 
 
 ```bash
-git clone https://github.com/NeuralSpaz/LinzerSchnitteSound.git
-cd LinzerSchnitteSound/
+git clone https://github.com/LinzerSchnitte/linzerschnitte-server.git
+
+cd cd linzerschnitte-server/
 ```
 
 ### Compile / Install
