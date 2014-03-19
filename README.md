@@ -15,7 +15,7 @@ For more information on the LinzerSchnitte Project:
 ```bash
 git clone https://github.com/LinzerSchnitte/linzerschnitte-server.git
 
-cd cd linzerschnitte-server/
+cd linzerschnitte-server/
 ```
 
 ### Compile / Install
