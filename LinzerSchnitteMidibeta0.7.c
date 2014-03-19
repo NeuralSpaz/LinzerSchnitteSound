@@ -1,4 +1,3 @@
-
 /*
     LinzerSchnitte Midi Sound Server - Midi Interface for generating pure tones for controlling LinzerSchnitte
     Copyright (C) 2014  Josh Gardiner
@@ -38,7 +37,7 @@ short *buf;
 double phi[512], velocity[512], midichannel[512], attack, decay, sustain, release, env_time[512], env_level[512];
 int note[512], gate[512], note_active[512];
 int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
-WINDOW *my_win, *my_other_win;
+//WINDOW *my_win, *my_other_win;
 
 int sample[NOTES][SAMPLES];
 int sample_offset[NOTES];
