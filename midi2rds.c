@@ -1,4 +1,3 @@
-
 /*
     LinzerSchnitte Midi 2 RDS - Midi Interface for generating RDS for Linzer Schnitter
     Copyright (C) 2014  Josh Gardiner
@@ -26,6 +25,7 @@
 #include <alsa/asoundlib.h>
 #include <math.h>
 #include <unistd.h>
+#include "i2c_bitbang.h"
 
 int cmd03_ontime1, cmd03_ontime2;	//CC102 CC103
 int cmd04_delayoff1, cmd04_delayoff2;	//CC104 CC105
@@ -77,42 +77,55 @@ int program_change_action(int channel, int value) {
     switch (value){
     	case 3:
 	  printf("RDSCMD: %2.2x %4.4x %4.4x\n",value,group,cmd03_ontime2*cmd03_ontime1); 
+				LS_CMD( value, group, cmd03_ontime2*cmd03_ontime1);
 	  break;  
         case 4:
 	  printf("RDSCMD: %2.2x %4.4x %4.4x\n",value,group,cmd04_delayoff2*cmd04_delayoff1); 
+			    LS_CMD( value, group, cmd04_delayoff2*cmd04_delayoff1);
 	  break;
         case 6:
 	  printf("RDSCMD: %2.2x %4.4x %4.4x\n",value,group,cmd06_tonethreshhold); 
+				 LS_CMD( value, group, cmd06_tonethreshhold);
 	  break;
         case 7:
 	  printf("RDSCMD: %2.2x %4.4x %4.4x\n",value,group,cmd07_hysteresis); 
+				LS_CMD( value, group, cmd07_hysteresis);
 	  break; 
         case 9:
 	  printf("RDSCMD: %2.2x %4.4x 0000\n",value,group); 
+				LS_CMD( value, group, 0);
 	  break; 
         case 10:
 	  printf("RDSCMD: %2.2x %4.4x 0000\n",value,group); 
+				LS_CMD( value, group, 0);
 	  break;
 	case 11:
 	  printf("RDSCMD: %2.2x %4.4x %2.2x%2.2x\n",value,group,cmd0b_attacktime,cmd0b_decaytime); 
+				LS_CMD( value, group, cmd0b_attacktime*0x100+cmd0b_decaytime);
 	  break;
         case 12:
 	  printf("RDSCMD: %2.2x %4.4x 0000\n",value,group); 
+				LS_CMD( value, group, 0);
 	  break;
 	case 13:
 	  printf("RDSCMD: %2.2x %4.4x %2.2x%2.2x\n",value,group,cmd0d_ontime,cmd0d_offtime); //0D 
-	  break;
+				LS_CMD( value, group, cmd0d_ontime*0x100+cmd0d_offtime);
+	  break; 
 	case 14:
 	  printf("RDSCMD: %2.2x %4.4x %2.2x%2.2x\n",value,group,cmd0e_ontimeramp,cmd0e_offtime); //0E
+				LS_CMD( value, group, cmd0e_ontimeramp*0x100+cmd0e_offtime);
 	  break;
 	case 15:
 	  printf("RDSCMD: %2.2x %4.4x %2.2x%2.2x\n",value,group,cmd0f_ontimeseed,cmd0f_offtimeseed); //0F
+				LS_CMD( value, group, cmd0f_ontimeseed*0x100+cmd0f_offtimeseed);
 	  break;
 	case 16:
-	  printf("RDSCMD: %2.2x %4.4x %2.2x%2.2x\n",value,group,cmd10_ontimeramp,cmd10_offtime=value); //10
+	  printf("RDSCMD: %2.2x %4.4x %2.2x%2.2x\n",value,group,cmd10_ontimeramp,cmd10_offtime); //10
+				LS_CMD( value, group, cmd10_ontimeramp*0x100+cmd10_offtime);
 	  break;
 	case 17:
 	  printf("RDSCMD: %2.2x %4.4x 0000\n",value,group); //11
+				LS_CMD( value, group, 0);
 	  break;
     }
     return(0);
@@ -203,6 +216,13 @@ int init_cmd_defaults() {
 
 int main () {
 
+    if (gpioSetup() != OK)
+    {
+        dbgPrint(DBG_INFO, "gpioSetup failed. Exiting\n");
+        return 1;
+    }
+
+
     seq_handle = open_seq();
 
     init_cmd_defaults();
@@ -212,5 +232,7 @@ int main () {
     }
 
     snd_seq_close (seq_handle);
+	gpioCleanup();
     return (0);
 }
+
