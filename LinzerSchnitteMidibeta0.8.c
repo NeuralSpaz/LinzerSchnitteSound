@@ -36,36 +36,10 @@ short *buf;
 double phi[512], velocity[512], midichannel[512], attack, decay, sustain, release, env_time[512], env_level[512];
 int note[512], gate[512], note_active[512];
 int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
+int *wavetable;
+int debug;
 
-int sample[NOTES][SAMPLES];
 int sample_offset[NOTES];
-// only need to generate one table
-generate_samples()
-{
-    int note_frequency;
-    int sample_rate;
-    double sample_gain;
-    double phase, sound, delta_phase;
-
-    sample_rate = rate;
-    sample_gain = gain;
-
-    int i;
-    int n;
-    for (i=0; i<NOTES; i++){
-      note_frequency = (i*freq_channel_width)+freq_start;
-      delta_phase = (M_PI * note_frequency * 2) / sample_rate ;
-      phase = 0;
-      for (n=0; n<SAMPLES; n++ ){
-        if (phase > 2 * M_PI) {
-            phase -= 2 * M_PI;
-          }
-        sound = sin(phase) * gain;
-        sample[i][n]= sound;
-        phase += delta_phase;
-      }
-    }
-}
 
 snd_seq_t *open_seq() {
 
@@ -85,6 +59,30 @@ snd_seq_t *open_seq() {
     return(seq_handle);
 }
 
+int generate_wave_table (int *ptr_wavetable,int sample_rate, int frequency_step){
+
+    double phase, delta_phase;
+
+    int num_samples;
+    num_samples= sample_rate / frequency_step;
+
+    delta_phase = (M_PI * frequency_step * 2) / sample_rate ;
+    phase = 0;
+
+    int i;
+    for (i=0; i<num_samples; i++ ){
+      if (phase > 2 * M_PI)
+          phase -= 2 * M_PI;
+      ptr_wavetable[i] = sin(phase) * gain;
+      phase += delta_phase;
+	  if (debug==1) {	  printf("Sample %d = %d \n", i, ptr_wavetable[i]);}
+    }
+    return(0);
+
+
+}
+
+
 snd_pcm_t *open_pcm(char *pcm_name) {
 
     snd_pcm_t *playback_handle;
@@ -102,8 +100,8 @@ snd_pcm_t *open_pcm(char *pcm_name) {
 
     snd_pcm_hw_params_set_rate_near(playback_handle, hw_params, &rate, 0);
 
-    snd_pcm_hw_params_set_channels(playback_handle, hw_params, 2);
-    snd_pcm_hw_params_set_periods(playback_handle, hw_params, 2, 0);
+    snd_pcm_hw_params_set_channels(playback_handle, hw_params, 1);
+    snd_pcm_hw_params_set_periods(playback_handle, hw_params, 1, 0);
     snd_pcm_hw_params_set_period_size(playback_handle, hw_params, buffer_size, 0);
     snd_pcm_hw_params(playback_handle, hw_params);
     snd_pcm_sw_params_alloca(&sw_params);
@@ -143,10 +141,12 @@ int midi_callback() {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
 			velocity[l1] = velocity[l1] / 127;
-			printf("CH %2.0f ", midichannel[l1]+1);
-			printf("Note %3d ON  ", note[l1]);
-			printf("Vel %3.0f ", velocity[l1]*127);
-			printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+			if (debug==1) {			
+				printf("CH %2.0f ", midichannel[l1]+1);
+				printf("Note %3d ON  ", note[l1]);
+				printf("Vel %3.0f ", velocity[l1]*127);
+				printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+			}
                         env_time[l1] = 0;
                         gate[l1] = 1;
                         note_active[l1] = 1;
@@ -160,10 +160,12 @@ int midi_callback() {
 			midichannel[l1] = ev->data.note.channel;
 			velocity[l1] = ev->data.note.velocity;
 			velocity[l1] = velocity[l1] / 127;
-			printf("CH %2.0f ", midichannel[l1]+1);
-			printf("Note %3d OFF ", note[l1]);
-			printf("Vel %3.0f ", velocity[l1]*127);
-			printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+			if (debug==1) {	
+				printf("CH %2.0f ", midichannel[l1]+1);
+				printf("Note %3d OFF ", note[l1]);
+				printf("Vel %3.0f ", velocity[l1]*127);
+				printf("Frequency %6.0f Hz\n", ((note[l1]*freq_channel_width)+((128*freq_channel_width*midichannel[l1])+freq_start)) );
+			}
                         env_time[l1] = 0;
                         gate[l1] = 0;
                     }
@@ -175,27 +177,29 @@ int midi_callback() {
     return (0);
 }
 
-int playback_callback (snd_pcm_sframes_t nframes) {
+
+
+int playback_callback2 (snd_pcm_sframes_t nframes) {
 
     int l1, l2, b ,c;
     double dphi, freq_note, sound;
-
+	int delta_position = 0;
     memset(buf, 0, nframes * 4);
+	
     for (l2 = 0; l2 < poly; l2++) {
         if (note_active[l2]) {
-	    b = note[l2];
-	    for (l1 = 0; l1 < nframes; l1++) {
-		c = sample_offset[b];
-                sound = sample[b][c] * envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
-                if (sample_offset[b]!=(SAMPLES-1)){
-		   ++sample_offset[b];
-                }
-                else {
-                   sample_offset[b] = 0;
-                }
+	    	b = note[l2];
+			delta_position = ((b+3)*100);
+	    	for (l1 = 0; l1 < nframes; l1++) {
+				if (sample_offset[b] > 22049){
+					sample_offset[b] -= 22050;
+				}
+//printf("frame = %d , Sample position = %d \n", l1, sample_position);
+                sound = wavetable[sample_offset[b]] * envelope(&note_active[l2], gate[l2], &env_level[l2], env_time[l2], attack, decay, sustain, release);
                 env_time[l2] += 1.0 / rate;
+				sample_offset[b] += delta_position;
                 buf[2 * l1] += sound;
-                buf[2 * l1 + 1] += sound;
+//                buf[2 * l1 + 1] += sound;
             }
         }
     }
@@ -203,9 +207,38 @@ int playback_callback (snd_pcm_sframes_t nframes) {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+void capture_keyboard(snd_seq_t *seq_handle) {
+        snd_seq_addr_t sender, dest;
+        snd_seq_port_subscribe_t *subs;
+        sender.client = 14;
+        sender.port = 0;
+        dest.client = 128;
+        dest.port = 0;
+        snd_seq_port_subscribe_alloca(&subs);
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+        snd_seq_port_subscribe_set_queue(subs, 1);
+        snd_seq_port_subscribe_set_time_update(subs, 1);
+        snd_seq_port_subscribe_set_time_real(subs, 1);
+        snd_seq_subscribe_port(seq_handle, subs);
+}
+
+
 int main (int argc, char *argv[]) {
 
 
+	debug = 1;
 
     int nfds, seq_nfds, l1;
 
@@ -235,14 +268,14 @@ int main (int argc, char *argv[]) {
 // Set default  
 // Move to function setdefaults()
     hwdevice = "hw:0";        //case D
-    attack = 0.002;           //case a
-    decay = 0.002;            //case d
+    attack = 0.005;           //case a
+    decay = 0.005;            //case d
     sustain = 1;              //case s
-    release = 0.002;          //case o
-    poly = 3;                 //case p
-    rate = 48000;             //case r
+    release = 0.005;          //case o
+    poly = 5;                 //case p
+    rate = 22050;             //case r
     gain = 1000;	      //case g
-    buffer_size = 512;	      //case b
+    buffer_size = 256;	      //case b
     freq_start = 300;         //case t
     freq_channel_width = 100; //case w
 
@@ -324,12 +357,22 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 	return 0;
 	default:
 		abort ();
-	}    
+	}
+    
 
+    int sample_rate, bit_depth, frequency_step, wavetable_size;
 
-    generate_samples();
+    sample_rate = 22050;
+    bit_depth = 16;
+    frequency_step = 1;
+    
+	wavetable_size = sample_rate/frequency_step;
+    wavetable = (int *) malloc((wavetable_size)*sizeof(int));
+    generate_wave_table(&wavetable[0],sample_rate,frequency_step);
+
  
-    buf = (short *) malloc (2 * sizeof (short) * buffer_size);
+    buf = (short *) malloc (sizeof (short) * buffer_size);
+//    buf = (short *) malloc (2 * sizeof (short) * buffer_size);
     playback_handle = open_pcm(hwdevice);
     seq_handle = open_seq();
     seq_nfds = snd_seq_poll_descriptors_count(seq_handle, POLLIN);
@@ -337,6 +380,9 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
     pfds = (struct pollfd *)alloca(sizeof(struct pollfd) * (seq_nfds + nfds));
     snd_seq_poll_descriptors(seq_handle, pfds, seq_nfds, POLLIN);
     snd_pcm_poll_descriptors (playback_handle, pfds+seq_nfds, nfds);
+
+    capture_keyboard(seq_handle);
+
     for (l1 = 0; l1 < poly; note_active[l1++] = 0);
     while (1) {
 	if (poll (pfds, seq_nfds + nfds, 1000) > 0) {
@@ -345,7 +391,7 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
             }
             for (l1 = seq_nfds; l1 < seq_nfds + nfds; l1++) {
                 if (pfds[l1].revents > 0) {
-                    if (playback_callback(buffer_size) < buffer_size) {
+                    if (playback_callback2(buffer_size) < buffer_size) {
                         fprintf (stderr, "xrun ! increase buffer \n");
                         snd_pcm_prepare(playback_handle);
                     }
@@ -356,5 +402,6 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
     snd_pcm_close (playback_handle);
     snd_seq_close (seq_handle);
     free(buf);
+    free(wavetable);
     return (0);
 }
