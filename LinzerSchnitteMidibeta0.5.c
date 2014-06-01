@@ -35,7 +35,7 @@ snd_pcm_t *playback_handle;
 short *buf;
 double phi[POLY], velocity[POLY], attack, decay, sustain, release, env_time[POLY], env_level[POLY];
 int note[POLY], gate[POLY], note_active[POLY];
-int rate = 48000;
+unsigned int rate = 48000;
 /*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
 
 /* TODO Make sample rate, buffer, gain and polyphony set from CL interface*/
