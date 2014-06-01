@@ -27,6 +27,7 @@
 #include <math.h>
 //#include <ncurses.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define NOTES 128
 #define SAMPLES 480
@@ -36,7 +37,8 @@ snd_pcm_t *playback_handle;
 short *buf;
 double phi[512], velocity[512], midichannel[512], attack, decay, sustain, release, env_time[512], env_level[512];
 int note[512], gate[512], note_active[512];
-int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
+unsigned int rate; 
+int poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
 //WINDOW *my_win, *my_other_win;
 
 int sample[NOTES][SAMPLES];
@@ -61,15 +63,15 @@ void connect2MidiThroughPort(snd_seq_t *seq_handle) {
         snd_seq_subscribe_port(seq_handle, subs);
 }
 
-generate_samples()
+int generate_samples()
 {
     int note_frequency;
     int sample_rate;
-    double sample_gain;
+    //double sample_gain;
     double phase, sound, delta_phase;
 
     sample_rate = rate;
-    sample_gain = gain;
+    //sample_gain = gain;
 
     int i;
     int n;
@@ -86,6 +88,7 @@ generate_samples()
         phase += delta_phase;
       }
     }
+    return 0;
 }
 
 snd_seq_t *open_seq() {
@@ -220,7 +223,7 @@ int midi_callback() {
 int playback_callback (snd_pcm_sframes_t nframes) {
 
     int l1, l2, b ,c;
-    double dphi, freq_note, sound;
+    double sound;
 
     memset(buf, 0, nframes * 4);
     for (l2 = 0; l2 < poly; l2++) {
@@ -268,20 +271,20 @@ int main (int argc, char *argv[]) {
     char *hwdevice;
     char *Dvalue = NULL;
     char *pvalue = NULL;
-    char *vvalue = NULL;
-    char *hvalue = NULL;
+    //char *vvalue = NULL;
+    //char *hvalue = NULL;
     char *avalue = NULL;
     char *dvalue = NULL;
     char *gvalue = NULL;
     char *rvalue = NULL;
     char *bvalue = NULL;
-    char *mvalue = NULL;
+    //char *mvalue = NULL;
     char *svalue = NULL;
     char *ovalue = NULL;
     char *tvalue = NULL;
     char *wvalue = NULL;
     
-    int index;
+    //int index;
     int c;
      
     opterr = 0;
@@ -313,7 +316,7 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
 		poly = atoi(pvalue);
 		break;
 	case 'v':
-		vvalue = optarg;
+		//vvalue = optarg;
 		break;
 	case 'h':
 		printf("Usage: LinzerSchnitteMidi  [-Dadsoprgbtw]\n");

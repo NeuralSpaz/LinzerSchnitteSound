@@ -36,7 +36,7 @@ snd_pcm_t *playback_handle;
 short *buf;
 double phi[POLY], velocity[POLY], midichannel[POLY], attack, decay, sustain, release, env_time[POLY], env_level[POLY];
 int note[POLY], gate[POLY], note_active[POLY];
-int rate = 192000;
+unsigned int rate = 192000;
 /*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
 
 /* TODO Make sample rate, buffer, gain and polyphony set from CL interface*/
@@ -193,8 +193,8 @@ void do_endwin(void) {endwin();}
 int main (int argc, char *argv[]) {
 
     int nfds, seq_nfds, l1;
-    int key;
-    key=0;
+    //int key;
+    //key=0;
     char *hwdevice;
     struct pollfd *pfds;
 /*

@@ -1,6 +1,6 @@
 # build executable
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -Werror
 LIBS+= -lasound -lm
 
 all: hw_params LSmidi5 LSmidi6 LSmidi7
