@@ -42,6 +42,25 @@ int rate, poly, gain, buffer_size, freq_start, freq_channel_width, row, col;
 int sample[NOTES][SAMPLES];
 int sample_offset[NOTES];
 
+void connect2MidiThroughPort(snd_seq_t *seq_handle) {
+        snd_seq_addr_t sender, dest;
+        snd_seq_port_subscribe_t *subs;
+        int myID;
+        myID=snd_seq_client_id(seq_handle);
+        fprintf(stderr,"MyID=%d",myID);  
+        sender.client = 14;
+        sender.port = 0;
+        dest.client = myID;
+        dest.port = 0;
+        snd_seq_port_subscribe_alloca(&subs);
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+        snd_seq_port_subscribe_set_queue(subs, 1);
+        snd_seq_port_subscribe_set_time_update(subs, 1);
+        snd_seq_port_subscribe_set_time_real(subs, 1);
+        snd_seq_subscribe_port(seq_handle, subs);
+}
+
 generate_samples()
 {
     int note_frequency;
@@ -418,6 +437,7 @@ while ((c = getopt (argc, argv, "D:p:v:ha:d:g:r:b:s:o:t:w:")) != -1)
     pfds = (struct pollfd *)alloca(sizeof(struct pollfd) * (seq_nfds + nfds));
     snd_seq_poll_descriptors(seq_handle, pfds, seq_nfds, POLLIN);
     snd_pcm_poll_descriptors (playback_handle, pfds+seq_nfds, nfds);
+    connect2MidiThroughPort(seq_handle);
     for (l1 = 0; l1 < poly; note_active[l1++] = 0);
     while (1) {
 	if (poll (pfds, seq_nfds + nfds, 1000) > 0) {

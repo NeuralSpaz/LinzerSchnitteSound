@@ -39,6 +39,24 @@ int rate = 48000;
 /*int polyphony, buffersize, outputvolume, firstnotefreq, freqchannelwidth; */
 
 /* TODO Make sample rate, buffer, gain and polyphony set from CL interface*/
+void connect2MidiThroughPort(snd_seq_t *seq_handle) {
+        snd_seq_addr_t sender, dest;
+        snd_seq_port_subscribe_t *subs;
+        int myID;
+        myID=snd_seq_client_id(seq_handle);
+        fprintf(stderr,"MyID=%d",myID);  
+        sender.client = 14;
+        sender.port = 0;
+        dest.client = myID;
+        dest.port = 0;
+        snd_seq_port_subscribe_alloca(&subs);
+        snd_seq_port_subscribe_set_sender(subs, &sender);
+        snd_seq_port_subscribe_set_dest(subs, &dest);
+        snd_seq_port_subscribe_set_queue(subs, 1);
+        snd_seq_port_subscribe_set_time_update(subs, 1);
+        snd_seq_port_subscribe_set_time_real(subs, 1);
+        snd_seq_subscribe_port(seq_handle, subs);
+}
 
 snd_seq_t *open_seq() {
 
@@ -198,6 +216,7 @@ int main (int argc, char *argv[]) {
     pfds = (struct pollfd *)alloca(sizeof(struct pollfd) * (seq_nfds + nfds));
     snd_seq_poll_descriptors(seq_handle, pfds, seq_nfds, POLLIN);
     snd_pcm_poll_descriptors (playback_handle, pfds+seq_nfds, nfds);
+    connect2MidiThroughPort(seq_handle);
     for (l1 = 0; l1 < POLY; note_active[l1++] = 0);
     while (1) {
         if (poll (pfds, seq_nfds + nfds, 1000) > 0) {
