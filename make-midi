@@ -1,1 +1,0 @@
-gcc -Wall  midi2rds.c i2c_bitbang.c -o midi2rds -I../gpio/include -L../gpio/library  -lrpigpio -lasound
