@@ -22,4 +22,5 @@ clean:
 	$(RM) LSmidi5
 	$(RM) LSmidi6
 	$(RM) LSmidi7
+	$(RM) hw_params
 	
